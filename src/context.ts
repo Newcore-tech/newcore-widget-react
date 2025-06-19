@@ -1,11 +1,21 @@
 class Context {
-    location?: 'NavBar' | 'TopBar' | 'SideBar' = 'TopBar';
+    /** 位置 */
+    location?: 'NavBar' | 'TopBar' | 'SideBar' | '' = '';
 
-    constructor () {
-        
+    language?: 'zh-CN' | 'en-US' | 'vi-VN' | 'ja-JP' | '' = '';
+
+    private static instance: Context;
+
+    /** 单例访问方法 */
+    public static getInstance(): Context {
+        if (!Context.instance) {
+            console.log('Context创建实例了几次')
+            Context.instance = new Context();
+        }
+        return Context.instance;
     }
     
-    update (payload: Partial<Context>) {
+    private update (payload: Partial<Context>) {
         Object.assign(this, payload);
     }
 }

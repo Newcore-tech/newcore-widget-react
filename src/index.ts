@@ -1,1 +1,1 @@
-export * from './common';
+export { XHYClient } from './common';
