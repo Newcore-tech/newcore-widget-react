@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@babel/preset-env": "^7.27.2",
+    "@coreui/web-event-bus": "^0.0.9",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-image": "^3.0.3",

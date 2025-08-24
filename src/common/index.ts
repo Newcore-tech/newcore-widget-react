@@ -11,10 +11,10 @@ export const XHYClient: IXHYClient = {
 
   async init(timeout: number = 10000): Promise<Client> {
     try {
-      const client = Client.getInstance();
+      const client = new Client();
 
       // 如果已经初始化且location已存在，直接返回
-      if (this._initialized && client?.context?.location) {
+      if (this._initialized) {
         return Promise.resolve(client);
       }
 
@@ -25,20 +25,20 @@ export const XHYClient: IXHYClient = {
           this._initialized = true;
 
           // 监听location更新
-          client.on((event) => {
+          client.listen((event) => {
             try {
               console.log('---> event info')
               console.log(event)
               if (event?.data?.type === 'get_location_intl') {
                 this._locationReady = true;
 
-                client.update({
-                  context: {
-                    ...client.context,
-                    location: event?.data?.location,
-                    language: event?.data?.language,
-                  }
-                });
+                // client.update({
+                //   context: {
+                //     ...client.context,
+                //     location: event?.data?.location,
+                //     language: event?.data?.language,
+                //   }
+                // });
 
                 // 通知所有等待的调用
                 this._resolveQueue.forEach(resolve => resolve(client));
@@ -66,14 +66,10 @@ export const XHYClient: IXHYClient = {
           throw new Error(`Failed to initialize XHYClient: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
-
-      console.log('--->location info')
-      console.log(client?.context?.location)
-
       // 如果location已经有值
-      if (client?.context?.location) {
-        return Promise.resolve(client);
-      }
+      // if (client?.context?.location) {
+      //   return Promise.resolve(client);
+      // }
 
       // 返回一个Promise，当location更新后resolve，或超时后reject
       return new Promise((resolve, reject) => {

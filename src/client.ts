@@ -1,31 +1,17 @@
-import Context from "./context";
+import { Context } from "./type";
+import { WebEventBus } from "@coreui/web-event-bus";
 
 class Client {
-    /** 平台上下文 */
-    context: any = {};
-
-    private static instance: Client;
-
-    /** 单例访问方法 */
-    public static getInstance(): Client {
-        if (!Client.instance) {
-            console.log('单例创建模式')
-            Client.instance = new Client();
-        }
-        return Client.instance;
-    }
-
-    constructor() {
-        this.context = Context.getInstance();
-    }
+    private eventBus: WebEventBus = new WebEventBus();
+    private listeners: { [key: string]: ((event?: any) => void)[] } = {};
 
     /** 更新 */
-    update (payload: Partial<Client>) {
+    update(payload: Partial<Client>) {
         Object.assign(this, payload);
     }
 
     /** 事件监听 */
-    on (func: (event?: any) => void) {
+    listen(func: (event?: any) => void) {
         console.log('--->window.addEventListener')
         console.log(window.addEventListener)
         window.addEventListener('message', (event) => {
@@ -37,7 +23,7 @@ class Client {
     }
 
     /** 事件触发 */
-    trigger (eventName: string, data = {}) {
+    trigger(eventName: string, data = {}) {
         console.log('eventName')
         console.log(eventName);
         const message = {
@@ -49,19 +35,117 @@ class Client {
         window.postMessage(message, '*');
     }
 
-    /** 获取当前位置 */
-    // getLocation () {
-    //     this.on((event?: any) => {
-    //         if (event?.data?.eventName === 'get_location') {
-    //             this.update({
-    //                 context: {
-    //                     ...this.context || {},
-    //                     location: event?.data?.location,
-    //                 }
-    //             })
-    //         }
-    //     });
-    // }
+    /** 生命周期 - 挂载 */
+    onMounted(context?: Context) {
+
+    }
+
+    /** 生命周期 - 卸载 */
+    onUnmounted() {
+
+    }
+
+    /**
+     * 事件绑定
+     * @param eventName 事件名称
+     * @param func 事件回调
+     */
+    on(eventName: string, func: (event?: any) => void) {
+        const listener = this.listeners[eventName];
+        if (listener) {
+            listener.push(func);
+        } else {
+            this.listeners[eventName] = [func];
+        }
+    }
+
+    /**
+     * 事件解绑
+     * @param eventName 事件名称
+     * @param func 事件回调
+     */
+    off(eventName: string, func?: (event?: any) => void) {
+        if (func) {
+            const listener = this.listeners[eventName];
+            if (listener) {
+                const index = listener.indexOf(func);
+                if (index !== -1) {
+                    listener.splice(index, 1);
+                }
+            }
+        } else {
+            delete this.listeners[eventName];
+        }
+    }
+
+    /**
+     * 事件是否绑定
+     * @param eventName 事件名称
+     * @param func 事件回调
+     * @returns 
+     */
+    has(eventName: string, func?: (event?: any) => void): boolean {
+        if (func) {
+            const listener = this.listeners[eventName];
+            if (listener) {
+                const index = listener.indexOf(func);
+                if (index !== -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取字段数据
+     * @param path 字段路径
+     * @returns 
+     */
+    async get(path: string): Promise<any> {
+
+    }
+
+    /**
+     * 设置字段数据
+     * @param path 字段路径
+     * @param value 字段值
+     */
+    async set(path: string, value: any) {
+
+    }
+
+    /**
+     * 调用方法
+     * @param path 方法路径
+     * @param args 方法参数
+     * @returns 
+     */
+    async invoke(path: string, ...args: any[]): Promise<any> {
+
+    }
+
+    /**
+     * 获取当前语言
+     * @returns 
+     */
+    async currentLanguage(): Promise<string> {
+        return 'zh-CN';
+    }
+    /**
+     * 发送请求，支持跨域请求
+     * @param url 请求地址
+     * @param options 请求配置
+     * @returns 
+     */
+    async request(url: string, options?: RequestInit): Promise<Response> {
+        const uri = new URL(url);
+        if (uri.origin !== window.location.origin) {
+            //Proxy
+        }
+        return fetch(url, options);
+    }
+
 }
 
 export default Client;

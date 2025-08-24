@@ -4,7 +4,11 @@ export interface Context {
     /** web端组件当前显示位置 */
     location?: 'NavBar' | 'TopBar' | 'SideBar' | '';
     /** 当前语言 */
-    language?: 'zh-CN' | 'en-US' | 'vi-VN' | 'ja-JP' | '';
+    // language?: 'zh-CN' | 'en-US' | 'vi-VN' | 'ja-JP' | '';
+    /** Sidebar path: RegExp */
+    sidebarPath?: string;
+    appId: string;
+    instanceId: string;
 }
 
 export interface IXHYClient {
@@ -27,13 +31,13 @@ export interface MessageEvent {
     data?: any;
     type?: string;
     location?: Context['location'];
-    language?: Context['language'];
+    language?: string;
 }
 
 export interface LocationEvent extends MessageEvent {
     type: 'get_location_intl';
     location: Context['location'];
-    language: Context['language'];
+    language: string;
 }
 
 export type EventHandler = (event?: {
