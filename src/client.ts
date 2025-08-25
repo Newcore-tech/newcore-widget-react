@@ -1,6 +1,10 @@
 import { Context } from "./type";
 import { WebEventBus } from "@coreui/web-event-bus";
 
+
+function toEventName(name: string) {
+    return `web-event-bus:${name}`;
+}
 class Client {
     private eventBus: WebEventBus = new WebEventBus();
     private listeners: { [key: string]: ((event?: any) => void)[] } = {};
@@ -112,7 +116,7 @@ class Client {
      * @param value 字段值
      */
     async set(path: string, value: any) {
-
+        this.eventBus.publish(toEventName("set"), { path, value });
     }
 
     /**
