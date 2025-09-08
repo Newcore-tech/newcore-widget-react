@@ -21,6 +21,7 @@ export default {
 		file: 'dist/index.js',
 		format: 'esm',
 	},
+	 external: ['react', 'react-dom'],
 	plugins: [
 		json(),
 		image(),

@@ -18,17 +18,29 @@ export interface IXHYClient {
     _rejectQueue: Array<(error: Error) => void>;
     _initTimeout: number;
     _timeoutIds: Set<number>;
+    _subscriptions: Set<string>;
+    _eventBus: SimpleEventBus;
+    _messageListener?: (evt: globalThis.MessageEvent) => void;
     init: (timeout?: number) => Promise<Client>;
     reset: () => void;
     isInitialized: () => boolean;
     isLocationReady: () => boolean;
 }
 
+export interface SimpleEventBus {
+    subscribe: (
+        eventName: string,
+        handler: (eventData: Record<string, unknown>) => void
+    ) => void;
+    unsubscribe: (eventName: string) => void;
+    publish?: (eventName: string, data: Record<string, unknown>) => void;
+}
+
 export interface MessageEvent {
     eventName: string;
     __xhyEvent: boolean;
     timestamp: number;
-    data?: any;
+    data?: unknown;
     type?: string;
     location?: Context['location'];
     language?: string;
