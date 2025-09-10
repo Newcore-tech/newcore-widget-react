@@ -211,26 +211,21 @@ class Client {
  * @returns 
  */
 async get(path: string): Promise<unknown> {
-  
-  // 向主页面发送请求
   return new Promise((resolve) => {
-    const eventId = `get_${Date.now()}`; 
-    
     // 监听主页面的响应
     const listener = (event: MessageEvent) => {
       if (event.data?.key === 'web-event-bus' && 
-          event.data?.eventName === `get:response:${eventId}`) {
-        resolve(event.data.payload);
-        window.removeEventListener('message', listener); 
+          event.data?.eventName === toEventName('get-response')) {
+        resolve(event.data.payload.value);
+        window.removeEventListener('message', listener);
       }
     };
     window.addEventListener('message', listener);
     
-   
     const message = {
       key: 'web-event-bus',  
-      eventName: `get:${path}`,  
-      payload: { eventId },  
+      eventName: toEventName('get'),  
+      payload: { key: path },  
       __xhyEvent: true,
       timestamp: Date.now()
     };
