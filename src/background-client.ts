@@ -1,13 +1,17 @@
 import { WebEventBus } from "@coreui/web-event-bus";
 
-export function toEventName(name: string) {
-  return `widget-event:${name}`;
+export function toBackgroundEventName(name: string) {
+  return `background-event:${name}`;
 }
 
-class Client {
+class BackgroundClient {
   // 创建WebEventBus实例
   private eventBus: WebEventBus = new WebEventBus();
   private listeners: Record<string, ((event?: unknown) => void)[]> = {};
+  private onInterceptCallbacks: Record<
+    string,
+    (data: unknown) => Promise<{ success: boolean; message?: string }>
+  > = {};
 
   // 修改构造函数
   constructor() {
@@ -23,12 +27,44 @@ class Client {
      *   data: unknown;
      * }
      */
-    this.eventBus.subscribe(toEventName("#onChange"), (event) => {
+    this.eventBus.subscribe(toBackgroundEventName("#onChange"), (event) => {
       console.log("Client #onChange event: ", event);
       const eventName = event.eventName as string;
       const data = event.data;
       const listenerList = this.listeners[eventName];
       listenerList?.forEach((listener) => listener(data));
+    });
+
+    /**
+     * #onIntercept
+     * event: {
+     *   eventName: string;
+     *   data: unknown;
+     *   key: string;
+     * }
+     */
+    this.eventBus.subscribe(toBackgroundEventName("#onIntercept"), (event) => {
+      console.log("Client #onIntercept event: ", event);
+      const name = event.name as string;
+      const data = event.data;
+      const interceptor = this.onInterceptCallbacks[name];
+      if (interceptor) {
+        interceptor(data)
+          .then((r) => {
+            this.eventBus.publishParent(toBackgroundEventName("#intercept-result"), {
+              success: r.success,
+              message: r.message,
+              name,
+            });
+          })
+          .catch((e) => {
+            console.error(`Error in onIntercept callback for event ${name}: ${e}`);
+            this.eventBus.publishParent(toBackgroundEventName("#intercept-result"), {
+              success: false,
+              message: `Error in onIntercept callback for event ${name}: ${String(e)}`,
+            });
+          });
+      }
     });
   }
 
@@ -40,6 +76,22 @@ class Client {
 
     // 清理eventBus资源
     // this.eventBus.destroy(); // WebEventBus可能没有destroy方法
+  }
+
+  /**
+   * 可拦截事件绑定
+   * @param name
+   * @param interceptor
+   */
+  addInterceptor(
+    name: string,
+    interceptor: (data: unknown) => Promise<{ success: boolean; message?: string }>,
+  ) {
+    this.onInterceptCallbacks[name] = interceptor;
+  }
+
+  removeInterceptor(name: string) {
+    delete this.onInterceptCallbacks[name];
   }
 
   /**
@@ -108,12 +160,12 @@ class Client {
     const p = new Promise<{ success: boolean; message?: string; data?: unknown }>((resolve) => {
       pResolve = resolve;
     });
-    this.eventBus.subscribe(toEventName(`#get-response:${path}`), (event) => {
+    this.eventBus.subscribe(toBackgroundEventName(`#get-response:${path}`), (event) => {
       console.log("#get response: ", event);
       pResolve?.(event);
-      this.eventBus.unsubscribe(toEventName(`#get-response:${path}`));
+      this.eventBus.unsubscribe(toBackgroundEventName(`#get-response:${path}`));
     });
-    this.eventBus.publishParent(toEventName("#get"), { path });
+    this.eventBus.publishParent(toBackgroundEventName("#get"), { path });
     return p;
   }
 
@@ -129,13 +181,13 @@ class Client {
     const p = new Promise<{ success: boolean; message?: string }>((resolve) => {
       pResolve = resolve;
     });
-    this.eventBus.subscribe(toEventName(`#set-result:${path}`), (event) => {
+    this.eventBus.subscribe(toBackgroundEventName(`#set-result:${path}`), (event) => {
       console.log("#set ack: ", event);
       pResolve({ success: event.success, message: event.message });
-      this.eventBus.unsubscribe(toEventName(`#set-result:${path}`));
+      this.eventBus.unsubscribe(toBackgroundEventName(`#set-result:${path}`));
     });
     // 发布set事件
-    this.eventBus.publishParent(toEventName("#set"), { path, value });
+    this.eventBus.publishParent(toBackgroundEventName("#set"), { path, value });
 
     return p;
   }
@@ -156,12 +208,12 @@ class Client {
     const p = new Promise<{ success: boolean; message?: string; data: unknown }>((resolve) => {
       pResolve = resolve;
     });
-    this.eventBus.subscribe(toEventName(`#invoke-result:${path}`), (event) => {
+    this.eventBus.subscribe(toBackgroundEventName(`#invoke-result:${path}`), (event) => {
       pResolve({ success: event.success, message: event.message, data: event.data });
-      this.eventBus.unsubscribe(toEventName(`#invoke-result:${path}`));
+      this.eventBus.unsubscribe(toBackgroundEventName(`#invoke-result:${path}`));
     });
     // 发布invoke事件
-    this.eventBus.publishParent(toEventName("#invoke"), { path, args });
+    this.eventBus.publishParent(toBackgroundEventName("#invoke"), { path, args });
 
     return p;
   }
@@ -174,16 +226,9 @@ class Client {
    */
   trigger(eventName: string, data: unknown) {
     // 发布trigger事件
-    this.eventBus.publishParent(toEventName("#trigger"), { eventName, data });
+    this.eventBus.publishParent(toBackgroundEventName("#trigger"), { eventName, data });
   }
 
-  /**
-   * 获取当前语言
-   * @returns
-   */
-  async currentLanguage(): Promise<string> {
-    return "zh-CN";
-  }
   /**
    * 发送请求，支持跨域请求
    * @param url 请求地址
@@ -192,11 +237,12 @@ class Client {
    */
   async request(url: string, options?: RequestInit): Promise<Response> {
     const uri = new URL(url);
-    if (uri.origin !== window.location.origin) {
-      //Proxy
+    if (uri.origin === window.location.origin) {
+      return Promise.reject(new Error("Origin is not allowed"));
     }
+    //Proxy
     return fetch(url, options);
   }
 }
 
-export default Client;
+export default BackgroundClient;
