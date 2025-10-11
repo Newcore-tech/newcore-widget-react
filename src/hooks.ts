@@ -7,7 +7,7 @@ export function useClient() {
 
   useEffect(() => {
     return () => client.clear();
-  }, []);
+  }, [client]);
 
   return client;
 }
@@ -17,7 +17,7 @@ export function useBackgroundClient() {
 
   useEffect(() => {
     return () => client.clear();
-  }, []);
+  }, [client]);
 
   return client;
 }

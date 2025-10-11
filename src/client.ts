@@ -178,24 +178,65 @@ class Client {
   }
 
   /**
-   * 获取当前语言
-   * @returns
-   */
-  async currentLanguage(): Promise<string> {
-    return "zh-CN";
-  }
-  /**
    * 发送请求，支持跨域请求
    * @param url 请求地址
    * @param options 请求配置
    * @returns
    */
-  async request(url: string, options?: RequestInit): Promise<Response> {
+  async requestProxy(
+    url: string,
+    {
+      method,
+      headers,
+      body,
+    }: {
+      method: "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "OPTIONS" | "TRACE";
+      headers?: Record<string, string>;
+      body?: string | Record<string, unknown>;
+    },
+  ): Promise<Response> {
     const uri = new URL(url);
-    if (uri.origin !== window.location.origin) {
-      //Proxy
+
+    //Proxy
+    let paramHeaders: Record<string, string[]> | undefined = undefined;
+    if (headers) {
+      Object.entries(headers).forEach(([key, value]) => {
+        if (paramHeaders) {
+          paramHeaders[key] = Array.isArray(value) ? value : [String(value)];
+        } else {
+          paramHeaders = { [key]: Array.isArray(value) ? value : [String(value)] };
+        }
+      });
     }
-    return fetch(url, options);
+    let queryParams: Record<string, string[]> | undefined = undefined;
+    if (uri.searchParams) {
+      uri.searchParams.forEach((value, key) => {
+        if (queryParams) {
+          queryParams[key] = [value];
+        } else {
+          queryParams = { [key]: [value] };
+        }
+      });
+    }
+    let paramBody: string | undefined = undefined;
+    if (body && typeof body === "object") {
+      paramBody = JSON.stringify(body);
+    } else if (body) {
+      paramBody = body;
+    }
+    return fetch("/api/orch/openapiv2/webWidget/forward", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        url,
+        method,
+        headers: paramHeaders,
+        body: paramBody,
+        queryParams,
+      }),
+    });
   }
 }
 

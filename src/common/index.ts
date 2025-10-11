@@ -1,8 +1,10 @@
-import Client from '../client';
-import { IXHYClient } from '../type';
-import { WebEventBus } from '@coreui/web-event-bus';
+import Client from "../client";
+import { WebEventBus } from "@coreui/web-event-bus";
 
-export const XHYClient: IXHYClient = {
+/**
+ * @deprecated Use hooks.ts
+ */
+export const XHYClient = {
   _initialized: false,
   _locationReady: false,
   _resolveQueue: [] as Array<(client: Client) => void>,
@@ -16,11 +18,11 @@ export const XHYClient: IXHYClient = {
   async init(): Promise<Client> {
     try {
       // 使用Client.getInstance()创建单例实例
-      const client = Client.getInstance();
+      const client = new Client();
 
       // 确保实例正确创建
-      if (!client || typeof client !== 'object') {
-        throw new Error('Failed to create valid Client instance');
+      if (!client || typeof client !== "object") {
+        throw new Error("Failed to create valid Client instance");
       }
 
       // // 检查必要方法是否存在
@@ -39,7 +41,7 @@ export const XHYClient: IXHYClient = {
           this._initialized = true;
 
           // 需要监听的事件类型列表
-          const eventTypes = ['get_location_intl', 'update_config', 'language_change'];
+          const eventTypes = ["get_location_intl", "update_config", "language_change"];
 
           // 使用for循环订阅所有需要的事件
           for (const eventType of eventTypes) {
@@ -49,7 +51,7 @@ export const XHYClient: IXHYClient = {
             // 使用WebEventBus的subscribe方法订阅事件
             this._eventBus.subscribe(eventName, (eventData: Record<string, unknown>) => {
               try {
-                if (eventType === 'get_location_intl') {
+                if (eventType === "get_location_intl") {
                   this._locationReady = true;
 
                   // 通知所有等待的调用
@@ -60,9 +62,9 @@ export const XHYClient: IXHYClient = {
                   // 清理所有超时
                   this._timeoutIds.forEach((id) => clearTimeout(id));
                   this._timeoutIds.clear();
-                } else if (eventType === 'update_config') {
+                } else if (eventType === "update_config") {
                   // 处理配置更新事件
-                } else if (eventType === 'language_change') {
+                } else if (eventType === "language_change") {
                   // 处理语言变更事件
                   if (eventData?.language) {
                     // 更新客户端语言设置
@@ -73,7 +75,7 @@ export const XHYClient: IXHYClient = {
                 // 通知所有等待的调用发生错误
                 this._rejectQueue.forEach((reject) =>
                   reject(
-                    error instanceof Error ? error : new Error('Unknown event processing error'),
+                    error instanceof Error ? error : new Error("Unknown event processing error"),
                   ),
                 );
                 this._resolveQueue = [];
@@ -92,7 +94,7 @@ export const XHYClient: IXHYClient = {
           this._initialized = false;
           throw new Error(
             `Failed to initialize XHYClient: ${
-              error instanceof Error ? error.message : 'Unknown error'
+              error instanceof Error ? error.message : "Unknown error"
             }`,
           );
         }
@@ -102,7 +104,7 @@ export const XHYClient: IXHYClient = {
       return Promise.resolve(client);
     } catch (error) {
       throw new Error(
-        `XHYClient init failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `XHYClient init failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   },
@@ -113,7 +115,7 @@ export const XHYClient: IXHYClient = {
     this._locationReady = false;
 
     // 清理所有等待的Promise
-    this._rejectQueue.forEach((reject) => reject(new Error('XHYClient reset')));
+    this._rejectQueue.forEach((reject) => reject(new Error("XHYClient reset")));
     this._resolveQueue = [];
     this._rejectQueue = [];
 
@@ -134,9 +136,9 @@ export const XHYClient: IXHYClient = {
     // 移除 window 消息监听
     if (this._messageListener) {
       try {
-        window.removeEventListener('message', this._messageListener as EventListener);
+        window.removeEventListener("message", this._messageListener as EventListener);
       } catch (e) {
-        console.error('Failed to remove window message listener:', e);
+        console.error("Failed to remove window message listener:", e);
       }
       this._messageListener = undefined;
     }
