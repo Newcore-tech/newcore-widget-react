@@ -102,8 +102,7 @@ function BackgroundWidget() {
 | `off` | `eventName: string, callback?: Function` | `void` | Unsubscribe from events |
 | `has` | `eventName: string, callback?: Function` | `boolean` | Check if event is subscribed |
 | `trigger` | `eventName: string, data: unknown` | `void` | Trigger custom events |
-| `currentLanguage` | - | `Promise<string>` | Get current language |
-| `request` | `url: string, options?: RequestInit` | `Promise<Response>` | Make HTTP requests with proxy support |
+| `requestProxy` | `url: string, { method, headers, body,}: {method: "GET" \| "POST" \| "PUT" \| "DELETE" \| "HEAD" \| "OPTIONS" \| "TRACE"; headers?: Record<string, string>; body?: string \| Record<string, unknown>; }` | `Promise<Response>` | Make HTTP requests with proxy support |
 
 ### BackgroundClient Additional Methods
 
@@ -119,15 +118,6 @@ function BackgroundWidget() {
 | `useClient()` | `Client` | Creates and manages a Client instance with automatic cleanup |
 | `useBackgroundClient()` | `BackgroundClient` | Creates and manages a BackgroundClient instance with automatic cleanup |
 
-### XHYClient Singleton
-
-| Method | Returns | Description |
-|--------|---------|-------------|
-| `XHYClient.init()` | `Promise<Client>` | Initialize the global client instance |
-| `XHYClient.reset()` | `void` | Reset and cleanup the global client |
-| `XHYClient.isInitialized()` | `boolean` | Check if client is initialized |
-| `XHYClient.isLocationReady()` | `boolean` | Check if location context is ready |
-
 ### Types
 
 ```typescript
@@ -137,8 +127,8 @@ interface EventResponse {
   data?: unknown; // Only for get() and invoke() operations
 }
 
-type LocationType = 'NavBar' | 'TopBar' | 'SideBar' | '';
-type LanguageType = 'zh-CN' | 'en-US' | 'vi-VN' | 'ja-JP' | '';
+type LocationType = 'NavBar' | 'TopBar' | 'SideBar' | 'Background';
+type LanguageType = 'zh-CN' | 'en-US' | 'vi-VN' | 'ja-JP';
 ```
 
 ## Event System
@@ -151,9 +141,9 @@ The library uses a sophisticated event system with different namespaces:
 
 ### Event Flow
 
-1. **Widget → Host**: Events are published to the parent frame using `publishParent()`
-2. **Host → Widget**: Events are received through subscriptions to specific event names
-3. **Async Operations**: Request-response patterns using unique event names with path/operation identifiers
+1. **Widget → Host**: Events are published to the parent frame like `set()`, `invoke()` or `trigger()`;
+2. **Host → Widget**: Events are received through subscriptions to specific event names like `on()`;
+3. **Async Operations**: Request-response patterns using unique event names with path/operation identifiers;
 
 ## Error Handling
 
