@@ -1,17 +1,17 @@
 import { WebEventBus } from "@coreui/web-event-bus";
 
-export function toEventName(name: string) {
-  return `widget-event:${name}`;
-}
-
 class Client {
   // 创建WebEventBus实例
-  private eventBus: WebEventBus = new WebEventBus();
-  private listeners: Record<string, ((event?: unknown) => void)[]> = {};
+  protected eventBus: WebEventBus = new WebEventBus();
+  protected listeners: Record<string, ((event?: unknown) => void)[]> = {};
 
   // 修改构造函数
   constructor() {
     this.init();
+  }
+
+  getEventName(name: string): string {
+    return `widget-event:${name}`;
   }
 
   //初始化方法
@@ -23,7 +23,7 @@ class Client {
      *   data: unknown;
      * }
      */
-    this.eventBus.subscribe(toEventName("#onChange"), (event) => {
+    this.eventBus.subscribe(this.getEventName("#onChange"), (event) => {
       console.log("Client #onChange event: ", event);
       const eventName = event.eventName as string;
       const data = event.data;
@@ -108,12 +108,12 @@ class Client {
     const p = new Promise<{ success: boolean; message?: string; data?: unknown }>((resolve) => {
       pResolve = resolve;
     });
-    this.eventBus.subscribe(toEventName(`#get-response:${path}`), (event) => {
+    this.eventBus.subscribe(this.getEventName(`#get-response:${path}`), (event) => {
       console.log("#get response: ", event);
       pResolve?.(event);
-      this.eventBus.unsubscribe(toEventName(`#get-response:${path}`));
+      this.eventBus.unsubscribe(this.getEventName(`#get-response:${path}`));
     });
-    this.eventBus.publishParent(toEventName("#get"), { path });
+    this.eventBus.publishParent(this.getEventName("#get"), { path });
     return p;
   }
 
@@ -129,13 +129,13 @@ class Client {
     const p = new Promise<{ success: boolean; message?: string }>((resolve) => {
       pResolve = resolve;
     });
-    this.eventBus.subscribe(toEventName(`#set-result:${path}`), (event) => {
+    this.eventBus.subscribe(this.getEventName(`#set-result:${path}`), (event) => {
       console.log("#set ack: ", event);
       pResolve({ success: event.success, message: event.message });
-      this.eventBus.unsubscribe(toEventName(`#set-result:${path}`));
+      this.eventBus.unsubscribe(this.getEventName(`#set-result:${path}`));
     });
     // 发布set事件
-    this.eventBus.publishParent(toEventName("#set"), { path, value });
+    this.eventBus.publishParent(this.getEventName("#set"), { path, value });
 
     return p;
   }
@@ -156,12 +156,12 @@ class Client {
     const p = new Promise<{ success: boolean; message?: string; data: unknown }>((resolve) => {
       pResolve = resolve;
     });
-    this.eventBus.subscribe(toEventName(`#invoke-result:${path}`), (event) => {
+    this.eventBus.subscribe(this.getEventName(`#invoke-result:${path}`), (event) => {
       pResolve({ success: event.success, message: event.message, data: event.data });
-      this.eventBus.unsubscribe(toEventName(`#invoke-result:${path}`));
+      this.eventBus.unsubscribe(this.getEventName(`#invoke-result:${path}`));
     });
     // 发布invoke事件
-    this.eventBus.publishParent(toEventName("#invoke"), { path, args });
+    this.eventBus.publishParent(this.getEventName("#invoke"), { path, args });
 
     return p;
   }
@@ -174,7 +174,7 @@ class Client {
    */
   trigger(eventName: string, data: unknown) {
     // 发布trigger事件
-    this.eventBus.publishParent(toEventName("#trigger"), { eventName, data });
+    this.eventBus.publishParent(this.getEventName("#trigger"), { eventName, data });
   }
 
   /**

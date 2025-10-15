@@ -1,4 +1,4 @@
-# @newcore/widget-react
+# @newcoretech/widget-react
 
 A React library for building widgets that communicate with the Newcore platform through an event-driven architecture. This library provides seamless integration between React components and the Newcore host application using WebEventBus for cross-frame communication.
 
@@ -18,11 +18,11 @@ A React library for building widgets that communicate with the Newcore platform 
 ## Installation
 
 ```bash
-npm install @newcore/widget-react
+npm install @newcoretech/widget-react
 # or
-yarn add @newcore/widget-react
+yarn add @newcoretech/widget-react
 # or
-pnpm add @newcore/widget-react
+pnpm add @newcoretech/widget-react
 ```
 
 ## Peer Dependencies
@@ -37,7 +37,7 @@ npm install react@>=17 react-dom@>=17
 
 ```tsx
 import React from 'react';
-import { useClient } from '@newcore/widget-react';
+import { useClient } from '@newcoretech/widget-react';
 
 function MyWidget() {
   const client = useClient();
@@ -67,7 +67,7 @@ For widgets that need to intercept and handle background operations:
 
 ```tsx
 import React from 'react';
-import { useBackgroundClient } from '@newcore/widget-react';
+import { useBackgroundClient } from '@newcoretech/widget-react';
 
 function BackgroundWidget() {
   const client = useBackgroundClient();
@@ -86,46 +86,6 @@ function BackgroundWidget() {
   }, [client]);
 
   return <div>Background widget running...</div>;
-}
-```
-
-### Advanced Usage with XHYClient
-
-For more complex initialization scenarios:
-
-```tsx
-import React from 'react';
-import { XHYClient } from '@newcore/widget-react';
-
-function AdvancedWidget() {
-  const [client, setClient] = React.useState(null);
-  const [isReady, setIsReady] = React.useState(false);
-
-  React.useEffect(() => {
-    const initializeClient = async () => {
-      try {
-        const clientInstance = await XHYClient.init();
-        setClient(clientInstance);
-        setIsReady(true);
-      } catch (error) {
-        console.error('Failed to initialize client:', error);
-      }
-    };
-
-    if (!XHYClient.isInitialized()) {
-      initializeClient();
-    }
-
-    return () => {
-      XHYClient.reset();
-    };
-  }, []);
-
-  if (!isReady) {
-    return <div>Initializing widget...</div>;
-  }
-
-  return <div>Advanced widget ready!</div>;
 }
 ```
 
@@ -177,29 +137,6 @@ interface EventResponse {
   data?: unknown; // Only for get() and invoke() operations
 }
 
-interface IXHYClient {
-  _initialized: boolean;
-  _locationReady: boolean;
-  _resolveQueue: Array<(client: Client) => void>;
-  _rejectQueue: Array<(error: Error) => void>;
-  _initTimeout: number;
-  _timeoutIds: Set<number>;
-  _subscriptions: Set<string>;
-  _eventBus: SimpleEventBus;
-  _messageListener?: (evt: globalThis.MessageEvent) => void;
-  init: (timeout?: number) => Promise<Client>;
-  reset: () => void;
-  isInitialized: () => boolean;
-  isLocationReady: () => boolean;
-}
-
-interface Context {
-  location?: 'NavBar' | 'TopBar' | 'SideBar' | '';
-  sidebarPath?: string;
-  appId: string;
-  instanceId: string;
-}
-
 type LocationType = 'NavBar' | 'TopBar' | 'SideBar' | '';
 type LanguageType = 'zh-CN' | 'en-US' | 'vi-VN' | 'ja-JP' | '';
 ```
@@ -241,14 +178,6 @@ if (!result.success) {
 // Use result.data safely
 ```
 
-## TypeScript Support
-
-The library is built with TypeScript and provides full type definitions. Import types as needed:
-
-```tsx
-import type { IXHYClient, Context, LocationEvent } from '@newcore/widget-react';
-```
-
 ## Widget Communication Protocol
 
 ### Event Namespaces
@@ -281,7 +210,7 @@ The library uses structured event namespaces for secure communication:
 
 ### Prerequisites
 
-- Node.js 16+
+- Node.js 18+
 - pnpm (recommended)
 
 ### Setup
@@ -348,6 +277,14 @@ The library is built using Rollup with the following outputs:
 - 📦 Full TypeScript support
 - 🎯 React hooks integration
 - 🔒 Secure event namespacing
+
+### 2.0.2 - 2025-10-11
+- Addressed type import reference to avoid missing `src/type.ts` and ensure type declarations resolve correctly.
+- Minor build and lint adjustments to improve development stability.
+
+### 2.0.3 - 2025-10-15
+- Modify class `BackgroundClient` to extends class `Client`.
+- Add method `requestProxy` in `Client` class to support proxy requests.
 
 ## License
 
