@@ -102,7 +102,7 @@ function BackgroundWidget() {
 | `off` | `eventName: string, callback?: Function` | `void` | Unsubscribe from events |
 | `has` | `eventName: string, callback?: Function` | `boolean` | Check if event is subscribed |
 | `trigger` | `eventName: string, data: unknown` | `void` | Trigger custom events |
-| `requestProxy` | `url: string, { method, headers, body,}: {method: "GET" \| "POST" \| "PUT" \| "DELETE" \| "HEAD" \| "OPTIONS" \| "TRACE"; headers?: Record<string, string>; body?: string \| Record<string, unknown>; }` | `Promise<Response>` | Make HTTP requests with proxy support |
+| `requestProxy` | `url: string, { method, headers, body,}: {method: "GET" \| "POST" \| "PUT" \| "DELETE" \| "HEAD" \| "OPTIONS" \| "TRACE"; headers?: Record<string, string>; body?: string \| Record<string, unknown>; }` | `Promise<{headers: Record<string, string>; status: number; body: { code: number; message: string; data: unknown };}` | Make HTTP requests with proxy support |
 
 ### BackgroundClient Additional Methods
 
@@ -275,6 +275,9 @@ The library is built using Rollup with the following outputs:
 ### 2.0.3 - 2025-10-15
 - Modify class `BackgroundClient` to extends class `Client`.
 - Add method `requestProxy` in `Client` class to support proxy requests.
+
+### 2.0.5 - 2025-10-16
+- Change response of `requestProxy` method to return a Promise.
 
 ## License
 

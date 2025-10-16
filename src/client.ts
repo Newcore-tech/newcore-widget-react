@@ -194,7 +194,11 @@ class Client {
       headers?: Record<string, string>;
       body?: string | Record<string, unknown>;
     },
-  ): Promise<Response> {
+  ): Promise<{
+    headers: Record<string, string>;
+    status: number;
+    body: { code: number; message: string; data: unknown };
+  }> {
     const uri = new URL(url);
 
     //Proxy
@@ -224,7 +228,7 @@ class Client {
     } else if (body) {
       paramBody = body;
     }
-    return fetch("/api/orch/openapiv2/webWidget/forward", {
+    const res = await fetch("/api/orch/openapiv2/webWidget/forward", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -237,6 +241,28 @@ class Client {
         queryParams,
       }),
     });
+    const resData = await res.json();
+    let data: unknown | undefined = undefined;
+    if (resData.code === 200 && resData.message) {
+      try {
+        data = JSON.parse(resData.message);
+      } catch (e) {
+        console.error("[newcoretech/widget-react] JSON parse error: ", e);
+      }
+    }
+    const status = res.status;
+    const responseHeaders: Record<string, string> = {};
+    res.headers.forEach((value, key) => {
+      responseHeaders[key] = value;
+    });
+    return {
+      headers: responseHeaders,
+      status,
+      body: {
+        ...resData,
+        data,
+      },
+    };
   }
 }
 
