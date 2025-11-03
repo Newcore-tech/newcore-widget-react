@@ -1,4 +1,5 @@
 import Client from "./client";
+import { publishToApp } from "./utils";
 
 class BackgroundClient extends Client {
   // 创建WebEventBus实例
@@ -41,10 +42,21 @@ class BackgroundClient extends Client {
               message: r.message,
               name,
             });
+            // 发送 app webview h5 事件
+            publishToApp(this.getEventName("#intercept-result"), {
+              success: r.success,
+              message: r.message,
+              name,
+            });
           })
           .catch((e) => {
             console.error(`Error in onIntercept callback for event ${name}: ${e}`);
             this.eventBus.publishParent(this.getEventName("#intercept-result"), {
+              success: false,
+              message: `Error in onIntercept callback for event ${name}: ${String(e)}`,
+            });
+            // 发送 app webview h5 事件
+            publishToApp(this.getEventName("#intercept-result"), {
               success: false,
               message: `Error in onIntercept callback for event ${name}: ${String(e)}`,
             });

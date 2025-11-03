@@ -1,4 +1,5 @@
 import { WebEventBus } from "@coreui/web-event-bus";
+import { publishToApp } from "./utils";
 
 class Client {
   // 创建WebEventBus实例
@@ -114,6 +115,9 @@ class Client {
       this.eventBus.unsubscribe(this.getEventName(`#get-response:${path}`));
     });
     this.eventBus.publishParent(this.getEventName("#get"), { path });
+    // 发送 app webview h5 事件
+    publishToApp(this.getEventName("#get"), { path });
+
     return p;
   }
 
@@ -136,6 +140,8 @@ class Client {
     });
     // 发布set事件
     this.eventBus.publishParent(this.getEventName("#set"), { path, value });
+    // 发送 app webview h5 事件
+    publishToApp(this.getEventName("#set"), { path, value });
 
     return p;
   }
@@ -162,6 +168,8 @@ class Client {
     });
     // 发布invoke事件
     this.eventBus.publishParent(this.getEventName("#invoke"), { path, args });
+    // 发送 app webview h5 事件
+    publishToApp(this.getEventName("#invoke"), { path, args });
 
     return p;
   }
@@ -175,6 +183,8 @@ class Client {
   trigger(eventName: string, data: unknown) {
     // 发布trigger事件
     this.eventBus.publishParent(this.getEventName("#trigger"), { eventName, data });
+    // 发送 app webview h5 事件
+    publishToApp(this.getEventName("#trigger"), { eventName, data });
   }
 
   /**
