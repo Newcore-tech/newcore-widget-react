@@ -22,12 +22,12 @@ This is a React library for building widgets that communicate with the Newcore p
 - `Client` (`src/client.ts`) - Main widget client for standard widget operations
 - `BackgroundClient` (`src/background-client.ts`) - Background client with interceptor capabilities for background operations
 
-**Event System**: Built on `@coreui/web-event-bus` for cross-frame communication:
+**Event System**: Built on `src/web-event-bus` for cross-frame communication:
 - Widget events use `widget-event:` prefix
 - Background events use `background-event:` prefix
 - Supports async operations with Promise-based responses
 
-**React Integration**: 
+**React Integration**:
 - `useClient()` hook - Creates and manages Client instance lifecycle
 - `useBackgroundClient()` hook - Creates and manages BackgroundClient instance lifecycle
 - Both hooks handle cleanup automatically
@@ -36,7 +36,7 @@ This is a React library for building widgets that communicate with the Newcore p
 
 **Data Operations**:
 - `get(path)` - Retrieve data from host application
-- `set(path, value)` - Update data in host application  
+- `set(path, value)` - Update data in host application
 - `invoke(path, ...args)` - Call methods in host application
 - `trigger(eventName, data)` - Trigger custom events
 
@@ -69,7 +69,7 @@ This is a React library for building widgets that communicate with the Newcore p
 src/
 ├── client.ts              # Main widget client implementation
 ├── background-client.ts   # Background client with interceptors
-├── hooks.ts              # React hooks for client management  
+├── hooks.ts              # React hooks for client management
 ├── index.ts              # Main exports
 ├── common/
 │   └── index.ts          # XHYClient singleton factory

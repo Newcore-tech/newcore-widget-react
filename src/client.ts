@@ -1,4 +1,4 @@
-import { WebEventBus } from "@coreui/web-event-bus";
+import { WebEventBus } from "./web-event-bus";
 import { publishToApp } from "./utils";
 
 class Client {

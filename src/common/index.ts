@@ -1,5 +1,5 @@
 import Client from "../client";
-import { WebEventBus } from "@coreui/web-event-bus";
+import { WebEventBus } from "../web-event-bus";
 
 /**
  * @deprecated Use hooks.ts

@@ -11,9 +11,6 @@ importers:
       '@babel/preset-env':
         specifier: ^7.27.2
         version: 7.27.2(@babel/core@7.27.3)
-      '@coreui/web-event-bus':
-        specifier: 0.0.11
-        version: 0.0.11
       '@rollup/plugin-babel':
         specifier: ^6.0.4
         version: 6.0.4(@babel/core@7.27.3)(@types/babel__core@7.20.5)(rollup@4.41.1)
@@ -605,9 +602,6 @@ packages:
   '@babel/types@7.27.3':
     resolution: {integrity: sha512-Y1GkI4ktrtvmawoSq+4FCVHNryea6uR+qUQy0AGxLSsjCX0nVmkYQMBLHDkXZuo5hGx7eYdnIaslsdBFm7zbUw==}
     engines: {node: '>=6.9.0'}
-
-  '@coreui/web-event-bus@0.0.11':
-    resolution: {integrity: sha512-LmYMXC5IsL0JuXD5mtliEJ06e8Oc0G+lXjZ+XIC3Ypx32mK7BTifPNXPl5xr+0Q1X7Tai7Gvyqp4q2DxJBZB/Q==, tarball: https://packages.aliyun.com/610cc5f776b0c8e58d7866ac/npm/npm-registry/@coreui/web-event-bus/-/@coreui/web-event-bus-0.0.11.tgz}
 
   '@esbuild/aix-ppc64@0.25.5':
     resolution: {integrity: sha512-9o3TMmpmftaCMepOdA5k/yDw8SfInyzWWTjYTFCX3kPSDJMROQTb8jg+h9Cnwnmm1vOzvxN7gIfB5V2ewpjtGA==}
@@ -3184,8 +3178,6 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
-
-  '@coreui/web-event-bus@0.0.11': {}
 
   '@esbuild/aix-ppc64@0.25.5':
     optional: true
